@@ -61,58 +61,70 @@ Flight Management System
 
 ## 📁 Project Structure
 
-### Frontend Structure
+### Root Directory Structure
 ```
-FMS-Frontend/
-├── public/
-├── src/
-│   ├── Components/
-│   │   ├── AddFlight.jsx
-│   │   ├── AddPassenger.jsx
-│   │   ├── AllFlights.jsx
-│   │   ├── Flight.jsx
-│   │   ├── FlightSearch.jsx
-│   │   ├── Footer.jsx
-│   │   ├── Navbar.jsx
-│   │   ├── Passengers.jsx
-│   │   ├── UpdateFlightById.jsx
-│   │   └── UpdatePassengerById.jsx
-│   ├── Utils/
-│   │   ├── addFlightSlice.js
-│   │   ├── store.js
-│   │   └── useFetchFlights.js
-│   ├── App.jsx
-│   └── main.jsx
-├── package.json
-└── README.md
-```
-
-### Backend Structure
-```
-FlightManagementSystem/
-├── src/main/java/com/fullstack/FlightManagementSystem/
-│   ├── Config/
-│   │   └── GlobalCorsConfig.java
-│   ├── Controller/
-│   │   ├── FlightController.java
-│   │   └── PassengerController.java
-│   ├── Exception/
-│   │   ├── GlobalExceptionHandler.java
-│   │   ├── IdNotFoundException.java
-│   │   └── ResourceNotFoundException.java
-│   ├── Model/
-│   │   ├── ApiResponse.java
-│   │   ├── Flight.java
-│   │   └── Passengers.java
-│   ├── Repository/
-│   │   ├── FlightRepository.java
-│   │   ├── FRepo.java
-│   │   └── PRepo.java
-│   ├── Service/
-│   │   ├── FlightService.java
-│   │   └── PassengerService.java
-│   └── FlightManagementSystemApplication.java
-└── pom.xml
+Flight-Management-System/
+├── FMS-Frontend/                    # React Frontend Application
+│   ├── public/
+│   │   └── vite.svg
+│   ├── src/
+│   │   ├── Components/
+│   │   │   ├── AddFlight.jsx
+│   │   │   ├── AddPassenger.jsx
+│   │   │   ├── AllFlights.jsx
+│   │   │   ├── Flight.jsx
+│   │   │   ├── FlightSearch.jsx
+│   │   │   ├── Footer.jsx
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── Passengers.jsx
+│   │   │   ├── UpdateFlightById.jsx
+│   │   │   └── UpdatePassengerById.jsx
+│   │   ├── Utils/
+│   │   │   ├── addFlightSlice.js
+│   │   │   ├── store.js
+│   │   │   └── useFetchFlights.js
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── index.css
+│   ├── .gitignore
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── vite.config.js
+│   ├── eslint.config.js
+│   └── index.html
+├── FlightManagementSystem/           # Spring Boot Backend Application
+│   └── FlightManagementSystem/
+│       ├── src/main/java/com/fullstack/FlightManagementSystem/
+│       │   ├── Config/
+│       │   │   └── GlobalCorsConfig.java
+│       │   ├── Controller/
+│       │   │   ├── FlightController.java
+│       │   │   └── PassengerController.java
+│       │   ├── Exception/
+│       │   │   ├── GlobalExceptionHandler.java
+│       │   │   ├── IdNotFoundException.java
+│       │   │   └── ResourceNotFoundException.java
+│       │   ├── Model/
+│       │   │   ├── ApiResponse.java
+│       │   │   ├── Flight.java
+│       │   │   └── Passengers.java
+│       │   ├── Repository/
+│       │   │   ├── FlightRepository.java
+│       │   │   ├── FRepo.java
+│       │   │   └── PRepo.java
+│       │   ├── Service/
+│       │   │   ├── FlightService.java
+│       │   │   └── PassengerService.java
+│       │   └── FlightManagementSystemApplication.java
+│       ├── src/main/resources/
+│       │   └── application.properties
+│       ├── target/                   # Build output (excluded from git)
+│       ├── .gitignore
+│       ├── .gitattributes
+│       ├── pom.xml
+│       ├── mvnw
+│       └── mvnw.cmd
+└── README.md                         # This file
 ```
 
 ## 🚀 Getting Started
@@ -124,17 +136,24 @@ FlightManagementSystem/
 - **PostgreSQL** database
 - **Git** (for version control)
 
-### Backend Setup
+### Quick Setup
 
-1. **Clone the repository**
+1. **Clone the Repository**
    ```bash
-   git clone <your-backend-repo-url>
-   cd FlightManagementSystem
+   git clone https://github.com/rohanprasadsah/Flight-Management-System-Full_Stack.git
+   cd Flight-Management-System-Full_Stack
    ```
 
-2. **Configure Database**
+### Backend Setup
+
+2. **Navigate to Backend Directory**
+   ```bash
+   cd FlightManagementSystem/FlightManagementSystem
+   ```
+
+3. **Configure Database**
    - Create a PostgreSQL database named `flight_management`
-   - Update `application.properties` with your database credentials:
+   - Update `src/main/resources/application.properties` with your database credentials:
    ```properties
    spring.datasource.url=jdbc:postgresql://localhost:5432/flight_management
    spring.datasource.username=your_username
@@ -143,32 +162,33 @@ FlightManagementSystem/
    spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
    ```
 
-3. **Run the Backend**
+4. **Run the Backend**
    ```bash
    mvn clean install
    mvn spring-boot:run
    ```
-   Backend will run on `http://localhost:8080`
+   ✅ Backend will run on `http://localhost:8080`
 
 ### Frontend Setup
 
-1. **Navigate to Frontend Directory**
+5. **Navigate to Frontend Directory** (open new terminal)
    ```bash
-   cd FMS-Frontend
+   cd Flight-Management-System-Full_Stack/FMS-Frontend
    ```
 
-2. **Install Dependencies**
+6. **Install Dependencies**
    ```bash
    npm install
    ```
 
-3. **Start Development Server**
+7. **Start Development Server**
    ```bash
    npm run dev
    ```
-   Frontend will run on `http://localhost:5173`
+   
+   ✅ Frontend will run on `http://localhost:5173`
 
-4. **Build for Production**
+8. **Build for Production**
    ```bash
    npm run build
    ```
