@@ -23,7 +23,7 @@ const UpdatePassengerById = () => {
       const res = await fetch(
         "http://localhost:8080/FMS/Passenger/updatePassenger/" + id,
         {
-          method: "PATCH",
+          method: "PUT",
           headers: { "content-type": "application/json" },
           body: JSON.stringify(passengerById),
         }
@@ -45,7 +45,9 @@ const UpdatePassengerById = () => {
       <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
         <div className="flex items-center justify-center space-x-2">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          <h1 className="text-xl font-semibold text-gray-700">Loading passenger details...</h1>
+          <h1 className="text-xl font-semibold text-gray-700">
+            Loading passenger details...
+          </h1>
         </div>
       </div>
     </div>
@@ -66,13 +68,18 @@ const UpdatePassengerById = () => {
             <div className="space-y-6">
               {/* First Name */}
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">First Name</label>
+                <label className="block text-sm font-semibold text-gray-700">
+                  First Name
+                </label>
                 <input
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent shadow-md transition-all duration-200 hover:shadow-lg bg-white"
                   type="text"
                   placeholder="Enter first name"
                   onChange={(e) =>
-                    setPassengerById({ ...passengerById, firstName: e.target.value })
+                    setPassengerById({
+                      ...passengerById,
+                      firstName: e.target.value,
+                    })
                   }
                   value={passengerById.firstName}
                 />
@@ -80,13 +87,18 @@ const UpdatePassengerById = () => {
 
               {/* Last Name */}
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">Last Name</label>
+                <label className="block text-sm font-semibold text-gray-700">
+                  Last Name
+                </label>
                 <input
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent shadow-md transition-all duration-200 hover:shadow-lg bg-white"
                   type="text"
                   placeholder="Enter last name"
                   onChange={(e) =>
-                    setPassengerById({ ...passengerById, lastName: e.target.value })
+                    setPassengerById({
+                      ...passengerById,
+                      lastName: e.target.value,
+                    })
                   }
                   value={passengerById.lastName}
                 />
@@ -94,7 +106,9 @@ const UpdatePassengerById = () => {
 
               {/* Age */}
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">Age</label>
+                <label className="block text-sm font-semibold text-gray-700">
+                  Age
+                </label>
                 <input
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent shadow-md transition-all duration-200 hover:shadow-lg bg-white"
                   type="number"
@@ -113,7 +127,7 @@ const UpdatePassengerById = () => {
 
           {/* Update Button */}
           <div className="flex justify-center">
-            <button 
+            <button
               onClick={handleUpdatePassenger}
               className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold py-4 px-8 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-orange-300 text-lg"
             >
