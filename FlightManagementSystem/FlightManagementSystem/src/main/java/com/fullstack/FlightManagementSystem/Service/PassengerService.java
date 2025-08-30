@@ -38,7 +38,7 @@ public class PassengerService {
 	
 	public ResponseEntity<ApiResponse<Passengers>> updateData(int id,Passengers p){
 		
-		 Passengers existingP = pr.findById(id).orElseThrow(() -> new IdNotFoundException(id + " : Invalid Id"));
+		 Passengers existingP = pr.findById(id).get();
 		 
 //		 Definition : hasText(String str) → returns true if the "str" is not null, not empty, not just spaces.
 //		 Package : org.springframework.util.StringUtils (Spring utility class)

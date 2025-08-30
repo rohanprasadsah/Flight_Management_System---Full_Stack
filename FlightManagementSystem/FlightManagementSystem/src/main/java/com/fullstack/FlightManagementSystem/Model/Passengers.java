@@ -30,4 +30,8 @@ public class Passengers {
 	@JoinColumn(name="flight_id")
 	@JsonIgnore
 	private Flight flight;
+	@ManyToOne
+	@JoinColumn(name = "User_id")
+	@JsonIgnore
+	private Users user;
 }
