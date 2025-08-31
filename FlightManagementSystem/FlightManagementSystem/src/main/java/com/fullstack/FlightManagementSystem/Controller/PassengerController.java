@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 //import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,11 +28,13 @@ public class PassengerController {
 	@Autowired
 	private PassengerService ps;
 	
+	@PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
 	@GetMapping("/findAll")
 	public ResponseEntity<ApiResponse<List<Passengers>>> findAll(){
 		return ps.findAll();
 	}
 	
+	@PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('CUSTOMER')")
 	@GetMapping("/findByFirstName")
 	public ResponseEntity<ApiResponse<List<Passengers>>> findByFirstName(@RequestParam String firstName){
 		return ps.findByFirstName(firstName);
@@ -42,16 +45,19 @@ public class PassengerController {
 		return ps.findById(id);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('CUSTOMER')")
 	@PostMapping("/save")
 	public ResponseEntity<ApiResponse<Passengers>> save(@RequestBody Passengers passenger){
 		return ps.save(passenger);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<ApiResponse<String>> delete(@PathVariable int id){
 		return ps.deleteData(id);
 	}
-
+	
+	@PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('CUSTOMER')")
 	@PutMapping("/updatePassenger/{id}")
 	public ResponseEntity<ApiResponse<Passengers>> update(@PathVariable int id,@RequestBody Passengers request) {
 	    return ps.updateData(id, request);
