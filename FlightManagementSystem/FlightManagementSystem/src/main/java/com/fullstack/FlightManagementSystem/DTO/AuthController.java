@@ -26,13 +26,14 @@ public class AuthController {
 	public ResponseEntity<AuthResponse> registerUser(@Valid @RequestBody RegisterRequest rru){
 		Users ru=us.registerUser(rru.getName(), rru.getEmail(), rru.getPassword(), rru.getRole());
 		String token=ju.generateToken(ru.getEmail());
-		AuthResponse auth=new AuthResponse();
-		auth.setToken(token);
-		auth.setType("Bearer");
-		auth.setEmail(ru.getEmail());
-		auth.setName(ru.getName());
-		auth.setRole(ru.getRole());
-		auth.setExpiresIn(86400000);
+		AuthResponse auth=AuthResponse.builder()
+				.token(token)
+				.type("Bearer")
+				.email(ru.getEmail())
+				.name(ru.getName())
+				.role(ru.getRole())
+				.expiresIn(86400000)
+				.build();
 //		return ResponseEntity.ok(auth);
 		return new ResponseEntity<AuthResponse>(auth,HttpStatus.OK);
 	}
