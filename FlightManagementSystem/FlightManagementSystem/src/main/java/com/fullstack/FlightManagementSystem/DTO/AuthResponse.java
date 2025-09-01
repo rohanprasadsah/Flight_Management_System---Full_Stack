@@ -3,12 +3,14 @@ package com.fullstack.FlightManagementSystem.DTO;
 import com.fullstack.FlightManagementSystem.Model.UserRole;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class AuthResponse {
 	private String token;		//The actual JWT token string
 	private String type;			//Always "Bearer" (standard JWT type)
