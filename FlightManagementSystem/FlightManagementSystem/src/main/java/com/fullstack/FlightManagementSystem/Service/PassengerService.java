@@ -12,6 +12,7 @@ import com.fullstack.FlightManagementSystem.Exception.IdNotFoundException;
 import com.fullstack.FlightManagementSystem.Exception.ResourceNotFoundException;
 import com.fullstack.FlightManagementSystem.Model.ApiResponse;
 import com.fullstack.FlightManagementSystem.Model.Passengers;
+import com.fullstack.FlightManagementSystem.Model.Users;
 import com.fullstack.FlightManagementSystem.Repository.PRepo;
 import org.springframework.util.StringUtils;
 
@@ -20,6 +21,9 @@ public class PassengerService {
 	
 	@Autowired
 	private PRepo pr;
+	
+	@Autowired
+	private UserService us;
 	
 	public ResponseEntity<ApiResponse<List<Passengers>>> findAll(){
 		List<Passengers> pl=pr.findAll();
@@ -84,6 +88,15 @@ public class PassengerService {
 		}
 		ApiResponse<Passengers> api= new ApiResponse<Passengers>(HttpStatus.FOUND.value(),"Data Found",o.get());
 		return new ResponseEntity<ApiResponse<Passengers>>(api,HttpStatus.FOUND);
+	}
+	
+	public boolean belongsToCurrentUser(int pId) {
+		Users u=us.getCurrentAuthenticatedUser();
+		Optional<Passengers> o=pr.findById(pId);
+		if(!o.isPresent()) {
+			return false;
+		}
+		return u.getId()==o.get().getUser().getId();
 	}
 
 }

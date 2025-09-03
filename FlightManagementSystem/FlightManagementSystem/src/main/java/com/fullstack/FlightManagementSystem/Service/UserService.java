@@ -5,6 +5,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +52,18 @@ public class UserService {
 	
 	public boolean validatePassword(String rawPassword, String encodedPassword) {
 		return pe.matches(rawPassword, encodedPassword);
+	}
+	
+	public Users getCurrentAuthenticatedUser() {
+		Authentication a=SecurityContextHolder.getContext().getAuthentication();
+		String email=a.getName();
+		Optional<Users> u=ur.findByEmail(email);
+		return u.get();
+	}
+	
+	public boolean isCurrentUser(int userId) {
+		Users u=getCurrentAuthenticatedUser();
+		return u.getId()==userId ;
 	}
 }
 
