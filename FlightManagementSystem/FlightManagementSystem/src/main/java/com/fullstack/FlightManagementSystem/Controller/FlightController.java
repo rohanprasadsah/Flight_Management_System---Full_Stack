@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fullstack.FlightManagementSystem.Model.ApiResponse;
 import com.fullstack.FlightManagementSystem.Model.Flight;
 import com.fullstack.FlightManagementSystem.Model.Passengers;
+import com.fullstack.FlightManagementSystem.Model.UserRole;
+import com.fullstack.FlightManagementSystem.Model.Users;
 import com.fullstack.FlightManagementSystem.Service.FlightService;
+import com.fullstack.FlightManagementSystem.Service.UserService;
 
 @RestController
 @RequestMapping("/FMS")
@@ -26,6 +31,8 @@ public class FlightController {
 	
 	@Autowired
 	private FlightService fs;
+	@Autowired
+	private UserService us;
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/save")
@@ -65,6 +72,12 @@ public class FlightController {
 	@PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('CUSTOMER')")
 	@PostMapping("/savePassenger/{id}")
 	public ResponseEntity<ApiResponse<Passengers>> savePassengerWithFlight(@PathVariable int id,@RequestBody Passengers p){
+		Authentication a=SecurityContextHolder.getContext().getAuthentication();
+		String email=a.getName();
+		Users u=us.findByEmail(email);
+		if(u.getRole()==UserRole.CUSTOMER) {
+			p.setUser(u);
+		}
 		return fs.savePassengerWithFlight(id, p);
 	}
 	
