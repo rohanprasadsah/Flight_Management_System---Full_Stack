@@ -33,7 +33,7 @@ const Flight = ({ f }) => {
         <div className="flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-3 shadow-md">
           <span className="text-purple-600">🕒</span>
           <span className="text-gray-700 font-medium">
-            Departure: <span className="font-bold text-purple-800">{f.time} {parseInt(f.time.split(":")[0], 10) >= 12 ? "PM" : "AM"}</span>
+            Departure: <span className="font-bold text-purple-800">{f.time} {f.time && f.time.includes(':') && parseInt(f.time.split(":")[0], 10) >= 12 ? "PM" : "AM"}</span>
           </span>
         </div>
         

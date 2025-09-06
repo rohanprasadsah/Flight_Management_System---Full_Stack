@@ -96,7 +96,11 @@ public class PassengerService {
 		if(!o.isPresent()) {
 			return false;
 		}
-		return u.getId()==o.get().getUser().getId();
+		// Check if passenger has a user assigned
+		if(o.get().getUser() == null) {
+			return false;
+		}
+	return u.getId()==o.get().getUser().getId();
 	}
 
 }

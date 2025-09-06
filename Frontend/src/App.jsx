@@ -5,6 +5,8 @@ import AddFlight from "./Components/AddFlight";
 import Passengers from "./Components/Passengers";
 import UpdatePassengerById from "./Components/UpdatePassengerById";
 import AddPassenger from "./Components/AddPassenger";
+import Login from "./Components/Login";
+import Register from "./Components/Register";
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
           }
         />
 
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/" element={<AllFlights />} />
         <Route path="/update/:id" element={<UpdateFlightById />} />
         <Route path="/add" element={<AddFlight />} />

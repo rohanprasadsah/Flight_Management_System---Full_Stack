@@ -40,6 +40,7 @@ public class FlightController {
 		return fs.saveData(f);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('CUSTOMER')")
 	@GetMapping("/find/{id}")
 	public ResponseEntity<ApiResponse<Flight>> findById(@PathVariable int id) {
 		return fs.findFlightById(id);
@@ -51,6 +52,7 @@ public class FlightController {
 		return fs.findFlightBySourceAndDestination(source, destination);
 	}
 	
+	@PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('CUSTOMER')")
 	@GetMapping("/findAll")
 	public ResponseEntity<ApiResponse<List<Flight>>> findAll() {
 		return fs.findAll();

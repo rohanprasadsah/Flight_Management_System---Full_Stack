@@ -54,8 +54,16 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-	    // Step 1: Disable CSRF protection (new way)
-	    http.csrf(csrf -> csrf.disable());
+	    // Step 1: Disable CSRF and configure CORS properly
+	    http.csrf(csrf -> csrf.disable())
+	        .cors(cors -> cors.configurationSource(request -> {
+	            var config = new org.springframework.web.cors.CorsConfiguration();
+	            config.setAllowCredentials(true);
+	            config.addAllowedOrigin("http://localhost:5173");
+	            config.addAllowedHeader("*");
+	            config.addAllowedMethod("*");
+	            return config;
+	        }));
 
 	    // Step 2: Configure URL authorization (new way)
 	    http.authorizeHttpRequests(auth -> auth

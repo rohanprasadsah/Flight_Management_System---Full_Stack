@@ -6,13 +6,16 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./Utils/store";
 import Navbar from "./Components/Navbar.jsx";
+import { AuthProvider } from "./Context/AuthContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <Provider store={store}>
-        <Navbar />
-        <App />
+        <AuthProvider>
+          <Navbar />
+          <App />
+        </AuthProvider>
       </Provider>
     </BrowserRouter>
   </StrictMode>

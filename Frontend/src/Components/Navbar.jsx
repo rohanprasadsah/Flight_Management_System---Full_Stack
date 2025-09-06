@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../Context/AuthContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isLoggedIn, logout } = useAuth();
 
   const isActive = (path) => {
     if (path === "/" && location.pathname === "/") return true;
@@ -11,12 +14,35 @@ const Navbar = () => {
     return false;
   };
 
-  const navLinks = [
-    { path: "/", name: "🏠 Home", icon: "✈️", isRoute: true },
-    { path: "/add", name: "➕ Add Flight", icon: "🛫", isRoute: true },
-    { path: "#about", name: "ℹ️ About Us", icon: "🏢", isRoute: false },
-    { path: "#contact", name: "📞 Contact Us", icon: "📧", isRoute: false },
-  ];
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  // Dynamic navigation based on login status
+  const getNavLinks = () => {
+    const baseLinks = [
+      { path: "/", name: "🏠 Home", icon: "✈️", isRoute: true },
+      { path: "#about", name: "ℹ️ About Us", icon: "🏢", isRoute: false },
+      { path: "#contact", name: "📞 Contact Us", icon: "📧", isRoute: false },
+    ];
+    
+    if (isLoggedIn) {
+      return [
+        ...baseLinks.slice(0, 1), // Home
+        { path: "/add", name: "➕ Add Flight", icon: "🛫", isRoute: true },
+        ...baseLinks.slice(1), // About, Contact
+      ];
+    } else {
+      return [
+        ...baseLinks.slice(0, 1), // Home
+        { path: "/login", name: "🔐 Login", icon: "👤", isRoute: true },
+        ...baseLinks.slice(1), // About, Contact
+      ];
+    }
+  };
+  
+  const navLinks = getNavLinks();
 
   return (
     <nav className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 shadow-2xl sticky top-0 z-50 border-b-4 border-indigo-200">
@@ -69,6 +95,22 @@ const Navbar = () => {
                     {link.name.split(" ").slice(1).join(" ")}
                   </a>
                 )
+              )}
+              
+              {/* User info and logout when logged in */}
+              {isLoggedIn && user && (
+                <div className="flex items-center space-x-4 ml-6">
+                  <div className="text-white text-sm">
+                    <div className="font-semibold">{user.name}</div>
+                    <div className="text-indigo-200 text-xs">{user.role}</div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
+                  >
+                    🚪 Logout
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -138,6 +180,24 @@ const Navbar = () => {
                 {link.name.replace(/^[^\s]+\s/, "")}
               </a>
             )
+          )}
+          
+          {/* Mobile user info when logged in */}
+          {isLoggedIn && user && (
+            <div className="px-4 py-3 bg-indigo-800 rounded-lg mx-2 mt-2">
+              <div className="flex items-center justify-between">
+                <div className="text-white text-sm">
+                  <div className="font-semibold">{user.name}</div>
+                  <div className="text-indigo-300 text-xs">{user.role}</div>
+                </div>
+                <button
+                  onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                  className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-sm font-medium transition-colors duration-300"
+                >
+                  🚪 Logout
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>

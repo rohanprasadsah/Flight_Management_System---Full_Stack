@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { useDispatch } from 'react-redux';
+import { authenticatedFetchJson } from '../Utils/authApi';
 import { addNewFlight } from "../Utils/addFlightSlice";
 
 const AddFlight = () => {
@@ -15,17 +16,64 @@ const AddFlight = () => {
     img: "",
   });
 
-  const handleAdd = async () => {
-    const res = await fetch("http://localhost:8080/FMS/save", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(flight),
-    });
-    const resData = await res.json();
-
-    dispatch(addNewFlight(resData.data));
-
-    alert("Flight added successfully !!");
+  // Handle adding new flight with JWT authentication
+  const handleAdd = async (e) => {
+    e.preventDefault(); // Prevent form submission/navigation
+    
+    // VALIDATION: Check if all required fields are filled
+    if (!flight.name || !flight.source || !flight.destination || !flight.time || !flight.price) {
+      alert('Please fill in all required fields!');
+      return;
+    }
+    
+    try {
+      console.log('ADD FLIGHT - Attempting to save flight:', flight);
+      
+      // Use enhanced authentication API that handles token expiration
+      const response = await authenticatedFetchJson(
+        'http://localhost:8080/FMS/save',
+        {
+          method: 'POST',
+          body: JSON.stringify(flight)
+        }
+      );
+      
+      // Update Redux store with new flight data
+      if (response && response.data) {
+        dispatch(addNewFlight(response.data));
+      }
+      
+      // Show success message to user
+      console.log('ADD FLIGHT - Flight added successfully:', response);
+      alert("Flight added successfully !!");
+      
+      // Reset form after successful submission
+      setFlight({
+        name: "",
+        source: "",
+        destination: "",
+        time: "",
+        price: "",
+        img: "",
+      });
+      
+    } catch (error) {
+      console.error('Error adding flight:', error);
+      
+      // Enhanced error handling with specific messages
+      if (error.message.includes('Authentication')) {
+        // Authentication errors are handled by authApi (redirects to login)
+        return;
+      } else if (error.message.includes('Access denied')) {
+        alert('Access denied. Only administrators can add flights.');
+      } else if (error.message.includes('Invalid request')) {
+        alert('Invalid flight data. Please check all fields.');
+      } else if (error.message.includes('Network error')) {
+        alert('Network error. Please check your connection and try again.');
+      } else {
+        alert('Error adding flight. Please try again.');
+      }
+    }
   };
 
   return (
@@ -42,6 +90,7 @@ const AddFlight = () => {
                   <input
                     type="text"
                     id="name"
+                    value={flight.name}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-md transition-all duration-200 hover:shadow-lg"
                     placeholder="Enter flight name"
                     onChange={(e) => setFlight({ ...flight, name: e.target.value })}
@@ -53,6 +102,7 @@ const AddFlight = () => {
                   <input
                     type="text"
                     id="source"
+                    value={flight.source}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-md transition-all duration-200 hover:shadow-lg"
                     placeholder="Departure city"
                     onChange={(e) => setFlight({ ...flight, source: e.target.value })}
@@ -64,6 +114,7 @@ const AddFlight = () => {
                   <input
                     type="text"
                     id="destination"
+                    value={flight.destination}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-md transition-all duration-200 hover:shadow-lg"
                     placeholder="Arrival city"
                     onChange={(e) =>
@@ -77,6 +128,7 @@ const AddFlight = () => {
                   <input
                     type="text"
                     id="time"
+                    value={flight.time}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-md transition-all duration-200 hover:shadow-lg"
                     placeholder="HH:MM format"
                     onChange={(e) => setFlight({ ...flight, time: e.target.value })}
@@ -88,6 +140,7 @@ const AddFlight = () => {
                   <input
                     type="text"
                     id="price"
+                    value={flight.price}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-md transition-all duration-200 hover:shadow-lg"
                     placeholder="Ticket price"
                     onChange={(e) => setFlight({ ...flight, price: e.target.value })}
@@ -99,6 +152,7 @@ const AddFlight = () => {
                   <input
                     type="text"
                     id="img"
+                    value={flight.img}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-md transition-all duration-200 hover:shadow-lg"
                     placeholder="Flight image URL"
                     onChange={(e) => setFlight({ ...flight, img: e.target.value })}
@@ -108,13 +162,20 @@ const AddFlight = () => {
             </fieldset>
           </form>
           
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center gap-4 mt-8">
+            <button 
+              type="button"
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-300" 
+              onClick={handleAdd}
+            >
+              ✈️ Add Flight
+            </button>
             <Link to={"/"}>
               <button 
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-300" 
-                onClick={handleAdd}
+                type="button"
+                className="bg-gradient-to-r from-gray-600 to-slate-600 hover:from-gray-700 hover:to-slate-700 text-white font-bold py-4 px-8 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-gray-300"
               >
-                ✈️ Add Flight
+                ← Back to Home
               </button>
             </Link>
           </div>
