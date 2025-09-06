@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { authenticatedFetchJson } from '../Utils/authApi';
 
 const UpdatePassengerById = () => {
   const [passengerById, setPassengerById] = useState(null);
@@ -7,11 +8,23 @@ const UpdatePassengerById = () => {
 
   useEffect(() => {
     const fetchPassengerById = async () => {
-      const flight = await fetch(
-        "http://localhost:8080/FMS/Passenger/find/" + id
-      );
-      const data = await flight.json();
-      setPassengerById(data.data);
+      // OLD CODE - commented out for JWT authentication
+      // const flight = await fetch(
+      //   "http://localhost:8080/FMS/Passenger/find/" + id
+      // );
+      // const data = await flight.json();
+      // setPassengerById(data.data);
+      
+      // NEW CODE - with JWT authentication
+      try {
+        const data = await authenticatedFetchJson(
+          "http://localhost:8080/FMS/Passenger/find/" + id
+        );
+        setPassengerById(data.data);
+      } catch (error) {
+        console.error('Error fetching passenger:', error);
+        alert('Error loading passenger details. Please check your authentication and try again.');
+      }
     };
     if (id) {
       fetchPassengerById();
@@ -19,24 +32,41 @@ const UpdatePassengerById = () => {
   }, [id]);
 
   const handleUpdatePassenger = async () => {
+    // OLD CODE - commented out for JWT authentication
+    // try {
+    //   const res = await fetch(
+    //     "http://localhost:8080/FMS/Passenger/updatePassenger/" + id,
+    //     {
+    //       method: "PUT",
+    //       headers: { "content-type": "application/json" },
+    //       body: JSON.stringify(passengerById),
+    //     }
+    //   );
+    //   if (!res.ok) {
+    //     throw new Error("Failed to update passenger !!");
+    //   }
+    //   const resData = await res.json();
+    //   setPassengerById(resData.data);
+    //   alert("Passenger updated successfully !!");
+    // } catch (err) {
+    //   console.error(err);
+    //   alert("Error updating passenger !!");
+    // }
+    
+    // NEW CODE - with JWT authentication
     try {
-      const res = await fetch(
+      const resData = await authenticatedFetchJson(
         "http://localhost:8080/FMS/Passenger/updatePassenger/" + id,
         {
           method: "PUT",
-          headers: { "content-type": "application/json" },
           body: JSON.stringify(passengerById),
         }
       );
-      if (!res.ok) {
-        throw new Error("Failed to update passenger !!");
-      }
-      const resData = await res.json();
       setPassengerById(resData.data);
       alert("Passenger updated successfully !!");
     } catch (err) {
       console.error(err);
-      alert("Error updating passenger !!");
+      alert("Error updating passenger. Please check your authentication and try again.");
     }
   };
 

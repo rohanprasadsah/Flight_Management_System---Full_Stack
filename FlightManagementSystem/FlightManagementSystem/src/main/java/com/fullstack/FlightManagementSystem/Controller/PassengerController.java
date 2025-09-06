@@ -40,7 +40,7 @@ public class PassengerController {
 		return ps.findAll();
 	}
 	
-	@PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('CUSTOMER')")
 	@GetMapping("/findByFirstName")
 	public ResponseEntity<ApiResponse<List<Passengers>>> findByFirstName(@RequestParam String firstName){
 		return ps.findByFirstName(firstName);
@@ -77,16 +77,5 @@ public class PassengerController {
 	public ResponseEntity<ApiResponse<Passengers>> update(@PathVariable int id,@RequestBody Passengers request) {
 	    return ps.updateData(id, request);
 	}
-	
-//	private Users getCurrentUser() {
-//	    // Get current authentication from Spring Security context
-//	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//	    
-//	    // Extract email from authentication (this comes from JWT)
-//	    String email = authentication.getName();
-//	    
-//	    // Find and return the user
-//	    return userService.findByEmail(email);
-//	}
 	
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { authenticatedFetchJson } from '../Utils/authApi';
 
 const AddPassenger = () => {
   const { id } = useParams();
@@ -15,11 +16,21 @@ const AddPassenger = () => {
 
   useEffect(() => {
     const getflight = async () => {
-      const res = await fetch("http://localhost:8080/FMS/find/" + id);
-      const resData = await res.json();
-      console.log(resData);
-
-      setFlight(resData.data);
+      // OLD CODE - commented out for JWT authentication
+      // const res = await fetch("http://localhost:8080/FMS/find/" + id);
+      // const resData = await res.json();
+      // console.log(resData);
+      // setFlight(resData.data);
+      
+      // NEW CODE - with JWT authentication
+      try {
+        const resData = await authenticatedFetchJson("http://localhost:8080/FMS/find/" + id);
+        console.log(resData);
+        setFlight(resData.data);
+      } catch (error) {
+        console.error('Error fetching flight:', error);
+        alert('Error loading flight details. Please check your authentication and try again.');
+      }
     };
     if (id) {
       getflight();
@@ -33,22 +44,42 @@ const AddPassenger = () => {
       return;
     }
 
+    // OLD CODE - commented out for JWT authentication
+    // try {
+    //   const res = await fetch(`http://localhost:8080/FMS/savePassenger/${id}`, {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify(passenger),
+    //   });
+    //   if (!res.ok) throw new Error("Failed to save passenger");
+    //   const data = await res.json();
+    //   console.log("Passenger saved:", data);
+    //   alert("Passenger added successfully!");
+    // } catch (err) {
+    //   console.error(err);
+    //   alert("Error adding passenger");
+    // }
+    
+    // NEW CODE - with JWT authentication and form reset
     try {
-      const res = await fetch(`http://localhost:8080/FMS/savePassenger/${id}`, {
+      const data = await authenticatedFetchJson(`http://localhost:8080/FMS/savePassenger/${id}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(passenger),
       });
 
-      if (!res.ok) throw new Error("Failed to save passenger");
-
-      const data = await res.json();
       console.log("Passenger saved:", data);
-
       alert("Passenger added successfully!");
+      
+      // Reset form after successful submission
+      setPassenger({
+        firstName: "",
+        lastName: "",
+        age: "",
+      });
+      
     } catch (err) {
       console.error(err);
-      alert("Error adding passenger");
+      alert("Error adding passenger. Please check your authentication and try again.");
     }
   };
 
