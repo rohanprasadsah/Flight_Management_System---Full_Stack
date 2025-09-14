@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { authenticatedFetchJson } from '../Utils/authApi';
 import FlightSearch from "./FlightSearch";
 import useFetchFlights from "../Utils/useFetchFlights";
 import { useSelector } from "react-redux";
@@ -18,15 +17,12 @@ const AllFlights = () => {
   const flights = useFetchFlights();
 
   useEffect(() => {
-    // SAFETY: Ensure flights is always an array
     if (Array.isArray(flights)) {
       setFetchedFlights(flights);
     } else {
-      console.warn('Flights data is not an array:', flights);
       setFetchedFlights([]);
     }
   }, [flights]);
-  
   // Flights are now properly loaded
 
   useEffect(() => {
@@ -38,89 +34,150 @@ const AllFlights = () => {
     }
   }, [addedFlight]);
 
-  // FLIGHT SEARCH FUNCTIONALITY
-  // WHY: Users need to search flights by source and destination cities
-  // WHAT: Filters flights based on departure and arrival cities
-  // BEHAVIOR: Shows search results instead of all flights when search is performed
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!source || !destination || source.trim() === '' || destination.trim() === '') {
+      alert('Please enter both source and destination cities to search');
+      return;
+    }
+    
+    const cleanSource = source.trim();
+    const cleanDestination = destination.trim();
+    const searchUrl = `http://localhost:8080/FMS/findBySourceAndDestination?source=${cleanSource}&destination=${cleanDestination}`;
+    
     try {
-      // STEP 1: Validate search inputs
-      if (!source || !destination || source.trim() === '' || destination.trim() === '') {
-        alert('Please enter both source and destination cities to search');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please log in to search flights.');
         return;
       }
       
-      console.log('SEARCH - Searching flights:', { source, destination });
+      const response = await fetch(searchUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        redirect: 'follow',
+        mode: 'cors'
+      });
       
-      // Use enhanced authentication API for flight search
-      const response = await authenticatedFetchJson(
-        `http://localhost:8080/FMS/findBySource&Destination?source=${encodeURIComponent(source)}&destination=${encodeURIComponent(destination)}`,
-        { method: 'GET' }
-      );
-      // Handle search results from enhanced authApi
-      console.log('SEARCH - Search results:', response);
+      if (response.status === 302) {
+        try {
+          const data = await response.json();
+          let flights = [];
+          if (data && data.data && Array.isArray(data.data)) {
+            flights = data.data;
+          } else if (Array.isArray(data)) {
+            flights = data;
+          }
+          
+          setSearchedFlights(flights);
+          
+          if (flights.length === 0) {
+            alert(`No flights found from "${cleanSource}" to "${cleanDestination}".`);
+          } else {
+            alert(`Found ${flights.length} flight(s) from "${cleanSource}" to "${cleanDestination}"!`);
+          }
+          return;
+        } catch (e) {
+          setSearchedFlights([]);
+          alert(`No flights found from "${cleanSource}" to "${cleanDestination}".`);
+          return;
+        }
+      }
       
-      // Extract flight data and ensure it's always an array
-      const flightData = response && response.data ? response.data : [];
-      setSearchedFlights(Array.isArray(flightData) ? flightData : []);
+      if (!response.ok) {
+        if (response.status === 401) {
+          alert('Session expired. Please log in again.');
+          localStorage.clear();
+          window.location.href = '/login';
+          return;
+        }
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       
-      // Show user feedback for search results
-      if (!flightData || flightData.length === 0) {
-        alert('No flights found for the specified route.');
+      const data = await response.json();
+      let flights = [];
+      if (data && data.data && Array.isArray(data.data)) {
+        flights = data.data;
+      } else if (Array.isArray(data)) {
+        flights = data;
+      }
+      
+      setSearchedFlights(flights);
+      
+      if (flights.length === 0) {
+        alert(`No flights found from "${cleanSource}" to "${cleanDestination}".`);
+      } else {
+        alert(`Found ${flights.length} flight(s) from "${cleanSource}" to "${cleanDestination}"!`);
       }
       
     } catch (error) {
-      console.error('Error searching flights:', error);
-      
-      // Enhanced error handling
-      if (error.message.includes('Authentication')) {
-        // Authentication errors are handled by authApi (redirects to login)
-        return;
-      } else if (error.message.includes('Access denied')) {
-        alert('Access denied. Please log in to search flights.');
-      } else if (error.message.includes('Network error')) {
-        alert('Network error while searching flights. Please check your connection.');
+      if (error.message.includes('401') || error.message.includes('Authentication')) {
+        alert('Session expired. Please log in again.');
+        localStorage.clear();
+        window.location.href = '/login';
+      } else if (error.message.includes('404')) {
+        alert(`No flights found from "${cleanSource}" to "${cleanDestination}".`);
+      } else if (error.message.includes('302')) {
+        alert(`Search completed but no flights found from "${cleanSource}" to "${cleanDestination}".`);
       } else {
-        alert('Failed to search flights. Please try again.');
+        alert('Search failed. Please check your connection and try again.');
       }
       
-      setSearchedFlights([]); // Reset search results on error
+      setSearchedFlights([]);
     }
   };
 
-  // Handle flight deletion with authentication
   const handleDelete = async (id) => {
     try {
-      console.log('DELETE - Attempting to delete flight ID:', id);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please log in to delete flights.');
+        return;
+      }
       
-      // Use enhanced authentication API for flight deletion
-      const response = await authenticatedFetchJson(
-        `http://localhost:8080/FMS/delete/${id}`,
-        { method: 'DELETE' }
-      );
+      const response = await fetch(`http://localhost:8080/FMS/delete/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
-      console.log('DELETE - Flight deleted successfully:', response);
+      if (!response.ok) {
+        if (response.status === 401) {
+          alert('Session expired. Please log in again.');
+          localStorage.clear();
+          window.location.href = '/login';
+          return;
+        } else if (response.status === 403) {
+          alert('Access denied. Only administrators can delete flights.');
+          return;
+        } else if (response.status === 404) {
+          alert('Flight not found. It may have already been deleted.');
+          return;
+        }
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       
-      // Update UI by removing deleted flight from the list
       setFetchedFlights(fetchedFlights.filter((f) => f.f_id !== id));
       setSearchedFlights(searchedFlights.filter((f) => f.f_id !== id));
       
       alert('Flight deleted successfully!');
       
     } catch (error) {
-      console.error('Error deleting flight:', error);
-      
-      // Enhanced error handling
-      if (error.message.includes('Authentication')) {
-        // Authentication errors are handled by authApi (redirects to login)
-        return;
-      } else if (error.message.includes('Access denied')) {
+      if (error.message.includes('401') || error.message.includes('Authentication')) {
+        alert('Session expired. Please log in again.');
+        localStorage.clear();
+        window.location.href = '/login';
+      } else if (error.message.includes('403') || error.message.includes('Access denied')) {
         alert('Access denied. Only administrators can delete flights.');
-      } else if (error.message.includes('not found')) {
+      } else if (error.message.includes('404') || error.message.includes('not found')) {
         alert('Flight not found. It may have already been deleted.');
-      } else if (error.message.includes('Network error')) {
+      } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
         alert('Network error. Please check your connection and try again.');
       } else {
         alert('Failed to delete flight. Please try again.');
@@ -150,8 +207,33 @@ const AllFlights = () => {
             destination={destination}
             setDestination={setDestination}
           />
+          
+          {/* Clear Search Button - Show when search results are displayed */}
+          {searchedFlights.length > 0 && (
+            <div className="flex justify-center mt-4 pt-4 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  setSearchedFlights([]);
+                  setSource('');
+                  setDestination('');
+                }}
+                className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-medium py-2 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-gray-300"
+              >
+                ↩️ Show All Flights
+              </button>
+            </div>
+          )}
         </div>
 
+        {/* Flight Results Header */}
+        {searchedFlights.length > 0 && (
+          <div className="bg-blue-50 rounded-xl p-4 mb-6 border border-blue-200">
+            <h3 className="text-lg font-semibold text-blue-800 text-center">
+              🔍 Search Results: {searchedFlights.length} flight{searchedFlights.length !== 1 ? 's' : ''} found from "{source}" to "{destination}"
+            </h3>
+          </div>
+        )}
+        
         {/* Flights Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12">
           {(() => {
@@ -163,7 +245,6 @@ const AllFlights = () => {
             } else if (Array.isArray(fetchedFlights)) {
               flightsToShow = fetchedFlights;
             }
-            
             // EMPTY STATE: Show message when no flights available
             if (flightsToShow.length === 0) {
               return (
@@ -174,7 +255,6 @@ const AllFlights = () => {
                 </div>
               );
             }
-            
             // RENDER FLIGHTS: Display available flights
             return flightsToShow.map((f) => {
               return (

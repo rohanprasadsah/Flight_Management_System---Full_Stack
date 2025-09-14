@@ -1,31 +1,31 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import authService from '../Services/authService';
-import { useAuth } from '../Context/AuthContext';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import authService from "../Services/authService";
+import { useAuth } from "../Context/AuthContext";
 
 function Register() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'CUSTOMER'
+    name: "",
+    email: "",
+    password: "",
+    role: "CUSTOMER",
   });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage('');
+    setMessage("");
 
     try {
       const response = await authService.register(
@@ -34,23 +34,22 @@ function Register() {
         formData.password,
         formData.role
       );
-      
-      // Update auth context with user data
-      login({
-        id: response.id,
-        name: response.name,
-        email: response.email,
-        role: response.role
-      }, response.token);
-      
+
+      login(
+        {
+          id: response.id,
+          name: response.name,
+          email: response.email,
+          role: response.role,
+        },
+        response.token
+      );
+
       setMessage(`Registration successful! Welcome ${response.name}`);
-      console.log('Registration response:', response);
-      
-      // Redirect to home page after 1 second
+
       setTimeout(() => {
-        navigate('/');
+        navigate("/");
       }, 1000);
-      
     } catch (error) {
       setMessage(`Registration failed: ${error.message}`);
     } finally {
@@ -63,7 +62,7 @@ function Register() {
       {/* Blurred background */}
       <div className="absolute inset-0 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 opacity-20"></div>
       <div className="absolute inset-0 backdrop-blur-sm bg-white/10"></div>
-      
+
       {/* Register form */}
       <div className="relative bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-white/20 max-w-md w-full mx-4">
         <div className="text-center mb-8">
@@ -73,7 +72,10 @@ function Register() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Full Name
             </label>
             <input
@@ -90,7 +92,10 @@ function Register() {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Email
             </label>
             <input
@@ -107,7 +112,10 @@ function Register() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Password
             </label>
             <input
@@ -124,7 +132,10 @@ function Register() {
           </div>
 
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Role
             </label>
             <select
@@ -145,24 +156,29 @@ function Register() {
             disabled={loading}
             className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
-            {loading ? 'Registering...' : 'Register'}
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
 
         {message && (
-          <div className={`mt-6 p-4 rounded-lg text-center ${
-            message.includes('successful') 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-red-100 text-red-700'
-          }`}>
+          <div
+            className={`mt-6 p-4 rounded-lg text-center ${
+              message.includes("successful")
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+            }`}
+          >
             {message}
           </div>
         )}
 
         <div className="mt-6 text-center">
           <p className="text-gray-600">
-            Already have an account?{' '}
-            <a href="/login" className="text-green-600 hover:text-green-700 font-medium">
+            Already have an account?{" "}
+            <a
+              href="/login"
+              className="text-green-600 hover:text-green-700 font-medium"
+            >
               Login here
             </a>
           </p>

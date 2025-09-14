@@ -1,136 +1,223 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { authenticatedFetchJson, forceLoginRedirect } from '../Utils/authApi';
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 const UpdateFlightById = () => {
   const [flight, setFlight] = useState(null);
   const { id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // OLD CODE - without authentication (commented out)
-    // const fetchById = async (id) => {
-    //   const flight = await fetch("http://localhost:8080/FMS/find/" + id);
-    //   const data = await flight.json();
-    //   setFlight(data.data);
-    // };
-    
-    // ENHANCED CODE - using authApi with token refresh and better error handling
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please log in to update flights.");
+      window.location.href = "/login";
+      return;
+    }
     const fetchById = async (id) => {
       try {
-        console.log('UPDATE - Fetching flight details for ID:', id);
-        
-        // Use enhanced authentication API that handles:
-        // - Token expiration checking
-        // - Automatic re-login on expired tokens
-        // - Better error handling for auth issues
-        const response = await authenticatedFetchJson(
-          `http://localhost:8080/FMS/find/${id}`,
-          { 
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
+        let response;
+
+        try {
+          const findResponse = await fetch(
+            `http://localhost:8080/FMS/find/${id}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "Cache-Control": "no-cache",
+              },
+              redirect: "follow",
+              mode: "cors",
             }
+          );
+
+          if (findResponse.ok) {
+            const data = await findResponse.json();
+            response = { data };
+          } else {
+            throw new Error(`Find endpoint failed: ${findResponse.status}`);
           }
-        );
-        
-        // Set flight data if request successful
+        } catch (findError) {
+          const allFlightsResponse = await fetch(
+            "http://localhost:8080/FMS/findAll",
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              redirect: "follow",
+              mode: "cors",
+            }
+          );
+
+          if (!allFlightsResponse.ok) {
+            throw new Error(
+              `Unable to fetch flights: ${allFlightsResponse.status}`
+            );
+          }
+
+          const allFlightsData = await allFlightsResponse.json();
+
+          if (
+            allFlightsData &&
+            allFlightsData.data &&
+            Array.isArray(allFlightsData.data)
+          ) {
+            const targetFlight = allFlightsData.data.find(
+              (flight) => flight.f_id == id
+            );
+            if (targetFlight) {
+              response = { data: targetFlight };
+            } else {
+              throw new Error("Flight not found in the system");
+            }
+          } else {
+            throw new Error("Unable to fetch flight data from server");
+          }
+        }
         if (response && response.data) {
           setFlight(response.data);
-          console.log('UPDATE - Flight data loaded successfully:', response.data);
         } else {
-          console.error('UPDATE - No flight data in response');
-          alert('Flight not found or you do not have permission to view it.');
+          alert("Flight not found or you do not have permission to view it.");
         }
-        
       } catch (error) {
-        console.error('Error fetching flight for update:', error);
-        
-        // Handle authentication errors - only clear tokens on 401 from backend
-        if (error.message.includes('Authentication failed') || error.message.includes('No authentication token')) {
+        if (
+          error.message.includes("Authentication failed") ||
+          error.message.includes("No authentication token")
+        ) {
           localStorage.clear();
-          alert('Please login again to continue.');
-          window.location.href = '/login';
+          alert("Please login again to continue.");
+          window.location.href = "/login";
           return;
-        } else if (error.message.includes('Access denied')) {
-          alert('You do not have permission to view this flight.');
-        } else if (error.message.includes('not found')) {
-          alert('Flight not found. It may have been deleted.');
-        } else if (error.message.includes('redirected')) {
-          alert('Server configuration issue. Please try again or contact support.');
+        } else if (error.message.includes("Access denied")) {
+          alert("You do not have permission to view this flight.");
+        } else if (error.message.includes("not found")) {
+          alert("Flight not found. It may have been deleted.");
+        } else if (error.message.includes("redirected")) {
+          alert(
+            "Server configuration issue. Please try again or contact support."
+          );
         } else {
-          alert('Failed to load flight details. Please try again.');
+          alert("Failed to load flight details. Please try again.");
         }
       }
     };
-    
+
     if (id) {
       fetchById(id);
     } else {
       alert("ID is not valid !!");
     }
   }, [id]);
-
-  // ENHANCED FLIGHT UPDATE FUNCTIONALITY
-  // FIXES: Token expiration issues, better error handling, automatic re-login
   const handleUpdateFlight = async (fid, f) => {
     try {
-      // STEP 1: Validate flight data before sending
-      if (!f.name || !f.source || !f.destination || !f.time || !f.price) {
-        alert('Please fill in all required fields (Name, Source, Destination, Time, Price)');
+      if (!f.name || !f.source || !f.destination || !f.time) {
+        alert(
+          "Please fill in all required fields (Name, Source, Destination, Time)"
+        );
         return;
       }
-      
-      console.log('UPDATE - Attempting to update flight ID:', fid);
-      console.log('UPDATE - Flight data:', f);
-      
-      // STEP 2: Convert price to number for backend (BigDecimal)
+      const priceValue = parseFloat(f.price);
+      if (isNaN(priceValue) || priceValue <= 0) {
+        alert("Please enter a valid price (greater than 0)");
+        return;
+      }
       const flightData = {
-        ...f,
-        price: parseFloat(f.price) || 0
+        f_id: fid, // Ensure ID is included
+        name: f.name?.trim() || "",
+        source: f.source?.trim() || "",
+        destination: f.destination?.trim() || "",
+        time: f.time?.trim() || "",
+        price: priceValue,
+        img: f.img?.trim() || "",
       };
-      
-      console.log('UPDATE - Sending flight data:', flightData);
-      
-      // Use enhanced authentication API
-      const response = await authenticatedFetchJson(
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to update flights.");
+        return;
+      }
+
+      const apiResponse = await fetch(
         `http://localhost:8080/FMS/putUpdate/${fid}`,
         {
-          method: 'PUT',
-          body: JSON.stringify(flightData)
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(flightData),
+          redirect: "follow",
+          mode: "cors",
         }
       );
-      
-      // STEP 3: Handle successful update
-      console.log('UPDATE - Flight updated successfully:', response);
-      alert('Flight updated successfully! Redirecting to home page...');
-      
-      // Redirect to home after successful update
+      if (!apiResponse.ok) {
+        if (apiResponse.status === 401) {
+          alert("Session expired. Please log in again.");
+          localStorage.clear();
+          window.location.href = "/login";
+          return;
+        } else if (apiResponse.status === 403) {
+          alert("Access denied. You do not have permission to update flights.");
+          return;
+        }
+        throw new Error(`HTTP ${apiResponse.status}`);
+      }
+
+      const response = await apiResponse.json();
+      alert("Flight updated successfully! Redirecting to home page...");
       setTimeout(() => {
-        window.location.href = '/';
+        navigate("/");
       }, 1500);
-      
     } catch (error) {
-      console.error('Error updating flight:', error);
-      
-      // Handle authentication errors - only force login on clear auth failures
-      if (error.message.includes('No authentication token')) {
+      if (error.message.includes("No authentication token")) {
+        alert("No authentication token found. Please log in again.");
         forceLoginRedirect();
         return;
-      } else if (error.message.includes('Authentication failed')) {
-        alert('Authentication failed. Please try logging in again.');
-        window.location.href = '/login';
+      } else if (
+        error.message.includes("Authentication failed") ||
+        error.message.includes("Authentication required")
+      ) {
+        alert("Authentication failed. Please log in again.");
+        localStorage.clear(); // Clear all auth data
+        window.location.href = "/login";
         return;
-      } else if (error.message.includes('Access denied')) {
-        alert('Access denied. Only administrators and staff can update flights.');
-      } else if (error.message.includes('Invalid request')) {
-        alert('Invalid flight data. Please check all fields and try again.');
-      } else if (error.message.includes('not found')) {
-        alert('Flight not found. It may have been deleted.');
-      } else if (error.message.includes('Network error')) {
-        alert('Network error. Please check your internet connection and try again.');
+      } else if (
+        error.message.includes("Access denied") ||
+        error.message.includes("insufficient permissions")
+      ) {
+        alert(
+          "Access denied. Only administrators and staff can update flights. Please check your account permissions."
+        );
+      } else if (
+        error.message.includes("Invalid request") ||
+        error.message.includes("400")
+      ) {
+        alert(
+          "Invalid flight data. Please check all fields are filled correctly and try again."
+        );
+      } else if (
+        error.message.includes("not found") ||
+        error.message.includes("404")
+      ) {
+        alert(
+          "Flight not found. It may have been deleted. Please refresh the page."
+        );
+      } else if (error.message.includes("Network error")) {
+        alert(
+          "Network error. Please check your internet connection and try again."
+        );
+      } else if (error.message.includes("500")) {
+        alert("Server error occurred. Please try again in a few minutes.");
       } else {
-        alert('Failed to update flight. Please try again later.');
+        alert(
+          `Failed to update flight: ${
+            error.message || "Unknown error"
+          }. Please check the browser console (F12) for more details.`
+        );
       }
     }
   };
@@ -170,7 +257,7 @@ const UpdateFlightById = () => {
                     onChange={(e) =>
                       setFlight({ ...flight, name: e.target.value })
                     }
-                    value={flight.name || ''}
+                    value={flight.name || ""}
                   />
                 </div>
 
@@ -189,7 +276,7 @@ const UpdateFlightById = () => {
                     onChange={(e) =>
                       setFlight({ ...flight, source: e.target.value })
                     }
-                    value={flight.source || ''}
+                    value={flight.source || ""}
                   />
                 </div>
 
@@ -208,7 +295,7 @@ const UpdateFlightById = () => {
                     onChange={(e) =>
                       setFlight({ ...flight, destination: e.target.value })
                     }
-                    value={flight.destination || ''}
+                    value={flight.destination || ""}
                   />
                 </div>
 
@@ -227,7 +314,7 @@ const UpdateFlightById = () => {
                     onChange={(e) =>
                       setFlight({ ...flight, time: e.target.value })
                     }
-                    value={flight.time || ''}
+                    value={flight.time || ""}
                   />
                 </div>
 
@@ -246,7 +333,7 @@ const UpdateFlightById = () => {
                     onChange={(e) =>
                       setFlight({ ...flight, price: e.target.value })
                     }
-                    value={flight.price || ''}
+                    value={flight.price || ""}
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -264,7 +351,7 @@ const UpdateFlightById = () => {
                     onChange={(e) =>
                       setFlight({ ...flight, img: e.target.value })
                     }
-                    value={flight.img || ''}
+                    value={flight.img || ""}
                   />
                 </div>
               </div>

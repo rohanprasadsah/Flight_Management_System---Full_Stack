@@ -1,35 +1,58 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Link } from "react-router-dom";
-import { authenticatedFetchJson } from '../Utils/authApi';
+import { useParams, Link, useNavigate } from "react-router-dom";
 
 const AddPassenger = () => {
-  const { id } = useParams();
   const [flight, setFlight] = useState(null);
   const [passenger, setPassenger] = useState({
     firstName: "",
     lastName: "",
     age: "",
   });
-
-  console.log("id: " + id);
-
+  const { id } = useParams();
+  const navigate = useNavigate();
   useEffect(() => {
     const getflight = async () => {
-      // OLD CODE - commented out for JWT authentication
-      // const res = await fetch("http://localhost:8080/FMS/find/" + id);
-      // const resData = await res.json();
-      // console.log(resData);
-      // setFlight(resData.data);
-      
-      // NEW CODE - with JWT authentication
       try {
-        const resData = await authenticatedFetchJson("http://localhost:8080/FMS/find/" + id);
-        console.log(resData);
-        setFlight(resData.data);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          alert("Please log in to view flight details.");
+          return;
+        }
+
+        // Use findAll endpoint which works reliably
+        const response = await fetch("http://localhost:8080/FMS/findAll", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          redirect: "follow",
+          mode: "cors",
+        });
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Session expired. Please log in again.");
+            localStorage.clear();
+            window.location.href = "/login";
+            return;
+          }
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const resData = await response.json();
+
+        // Extract flights array
+        const flights = Array.isArray(resData.data) ? resData.data : [];
+
+        // Find the specific flight
+        const targetFlight = flights.find((f) => f.f_id === parseInt(id));
+        if (!targetFlight) {
+          alert(`Flight with ID ${id} not found.`);
+          return;
+        }
+        setFlight(targetFlight);
       } catch (error) {
-        console.error('Error fetching flight:', error);
-        alert('Error loading flight details. Please check your authentication and try again.');
+        alert("Error loading flight details. Please try again.");
       }
     };
     if (id) {
@@ -53,33 +76,61 @@ const AddPassenger = () => {
     //   });
     //   if (!res.ok) throw new Error("Failed to save passenger");
     //   const data = await res.json();
-    //   console.log("Passenger saved:", data);
     //   alert("Passenger added successfully!");
     // } catch (err) {
-    //   console.error(err);
     //   alert("Error adding passenger");
     // }
-    
-    // NEW CODE - with JWT authentication and form reset
-    try {
-      const data = await authenticatedFetchJson(`http://localhost:8080/FMS/savePassenger/${id}`, {
-        method: "POST",
-        body: JSON.stringify(passenger),
-      });
 
-      console.log("Passenger saved:", data);
+    // FIXED - Direct fetch with proper authentication
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to add passengers.");
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:8080/FMS/savePassenger/${id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(passenger),
+          redirect: "follow",
+          mode: "cors",
+        }
+      );
+      if (!response.ok) {
+        if (response.status === 401) {
+          alert("Session expired. Please log in again.");
+          localStorage.clear();
+          window.location.href = "/login";
+          return;
+        } else if (response.status === 403) {
+          alert("Access denied. You do not have permission to add passengers.");
+          return;
+        }
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
       alert("Passenger added successfully!");
-      
+
       // Reset form after successful submission
       setPassenger({
         firstName: "",
         lastName: "",
         age: "",
       });
-      
+
+      // Navigate back to passengers page after successful addition
+      setTimeout(() => {
+        navigate(`/passenger/${id}`);
+      }, 1500); // Give user time to see the success message
     } catch (err) {
-      console.error(err);
-      alert("Error adding passenger. Please check your authentication and try again.");
+      alert("Error adding passenger. Please try again.");
     }
   };
 
@@ -88,7 +139,9 @@ const AddPassenger = () => {
       <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
         <div className="flex items-center justify-center space-x-2">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          <h1 className="text-xl font-semibold text-gray-700">Loading flight details...</h1>
+          <h1 className="text-xl font-semibold text-gray-700">
+            Loading flight details...
+          </h1>
         </div>
       </div>
     </div>
@@ -104,7 +157,12 @@ const AddPassenger = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 <div className="space-y-2">
-                  <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700">First Name</label>
+                  <label
+                    htmlFor="firstName"
+                    className="block text-sm font-semibold text-gray-700"
+                  >
+                    First Name
+                  </label>
                   <input
                     value={passenger.firstName}
                     type="text"
@@ -118,7 +176,12 @@ const AddPassenger = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700">Last Name</label>
+                  <label
+                    htmlFor="lastName"
+                    className="block text-sm font-semibold text-gray-700"
+                  >
+                    Last Name
+                  </label>
                   <input
                     value={passenger.lastName}
                     type="text"
@@ -132,7 +195,12 @@ const AddPassenger = () => {
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
-                  <label htmlFor="age" className="block text-sm font-semibold text-gray-700">Age</label>
+                  <label
+                    htmlFor="age"
+                    className="block text-sm font-semibold text-gray-700"
+                  >
+                    Age
+                  </label>
                   <input
                     value={passenger.age}
                     type="number"
@@ -140,15 +208,18 @@ const AddPassenger = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent shadow-md transition-all duration-200 hover:shadow-lg"
                     placeholder="Enter age"
                     onChange={(e) =>
-                      setPassenger({ ...passenger, age: Number(e.target.value) })
+                      setPassenger({
+                        ...passenger,
+                        age: Number(e.target.value),
+                      })
                     }
                   />
                 </div>
               </div>
 
               <div className="flex justify-center mt-6">
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-300"
                 >
                   ➕ Add Passenger
@@ -156,7 +227,7 @@ const AddPassenger = () => {
               </div>
             </fieldset>
           </form>
-          
+
           <div className="flex justify-center mt-8">
             <Link to={`/passenger/${id}`}>
               <button className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-gray-300">

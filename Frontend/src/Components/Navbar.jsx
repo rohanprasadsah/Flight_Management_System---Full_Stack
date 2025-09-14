@@ -16,17 +16,15 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
-
-  // Dynamic navigation based on login status
   const getNavLinks = () => {
     const baseLinks = [
       { path: "/", name: "🏠 Home", icon: "✈️", isRoute: true },
       { path: "#about", name: "ℹ️ About Us", icon: "🏢", isRoute: false },
       { path: "#contact", name: "📞 Contact Us", icon: "📧", isRoute: false },
     ];
-    
+
     if (isLoggedIn) {
       return [
         ...baseLinks.slice(0, 1), // Home
@@ -41,7 +39,7 @@ const Navbar = () => {
       ];
     }
   };
-  
+
   const navLinks = getNavLinks();
 
   return (
@@ -96,7 +94,7 @@ const Navbar = () => {
                   </a>
                 )
               )}
-              
+
               {/* User info and logout when logged in */}
               {isLoggedIn && user && (
                 <div className="flex items-center space-x-4 ml-6">
@@ -181,7 +179,7 @@ const Navbar = () => {
               </a>
             )
           )}
-          
+
           {/* Mobile user info when logged in */}
           {isLoggedIn && user && (
             <div className="px-4 py-3 bg-indigo-800 rounded-lg mx-2 mt-2">
@@ -191,7 +189,10 @@ const Navbar = () => {
                   <div className="text-indigo-300 text-xs">{user.role}</div>
                 </div>
                 <button
-                  onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                  onClick={() => {
+                    handleLogout();
+                    setIsMenuOpen(false);
+                  }}
                   className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-sm font-medium transition-colors duration-300"
                 >
                   🚪 Logout

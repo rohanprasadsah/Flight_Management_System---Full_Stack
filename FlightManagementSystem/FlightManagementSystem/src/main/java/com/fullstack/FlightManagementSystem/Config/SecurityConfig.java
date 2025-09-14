@@ -19,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy; //Session
 import org.springframework.security.web.SecurityFilterChain; //SecurityFilterChain: The main security configuration
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; //UsernamePasswordAuthenticationFilter: Built-in Spring filter
 import com.fullstack.FlightManagementSystem.Security.JwtAuthenticationFilter; //JwtAuthenticationFilter: Your custom filter
+import jakarta.servlet.http.HttpServletResponse; //HttpServletResponse: For custom error responses
 
 import com.fullstack.FlightManagementSystem.Model.Users;
 
@@ -77,10 +78,24 @@ public class SecurityConfig {
 	            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 	    );
 
-	    // Step 4: Add our JWT filter before the default authentication filter
+	    // Step 4: Configure exception handling to prevent redirects
+	    http.exceptionHandling(exceptions -> exceptions
+	            .authenticationEntryPoint((request, response, authException) -> {
+	                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	                response.setContentType("application/json");
+	                response.getWriter().write("{\"error\":\"Authentication required\",\"message\":\"Please provide a valid JWT token\"}");
+	            })
+	            .accessDeniedHandler((request, response, accessDeniedException) -> {
+	                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+	                response.setContentType("application/json");
+	                response.getWriter().write("{\"error\":\"Access denied\",\"message\":\"Insufficient permissions\"}");
+	            })
+	    );
+
+	    // Step 5: Add our JWT filter before the default authentication filter
 	    http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
-	    // Step 5: Build and return
+	    // Step 6: Build and return
 	    return http.build();
 	}
 

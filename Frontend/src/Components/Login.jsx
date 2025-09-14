@@ -37,7 +37,6 @@ function Login() {
       }, response.token);
       
       setMessage(`Login successful! Welcome ${response.name}`);
-      console.log('Login response:', response);
       
       // Redirect to home page after 1 second
       setTimeout(() => {

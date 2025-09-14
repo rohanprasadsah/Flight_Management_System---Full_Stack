@@ -15,19 +15,19 @@ export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Check if user is already logged in with valid token
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
     
     if (storedUser && token) {
       try {
-        // Just check if token exists - let backend validate it when making requests
         const parsedUser = JSON.parse(storedUser);
+        if (role && !parsedUser.role) {
+          parsedUser.role = role;
+        }
         setUser(parsedUser);
         setIsLoggedIn(true);
-        console.log('Restored user session from localStorage');
       } catch (error) {
-        console.error('Error parsing stored user data:', error);
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         localStorage.removeItem('role');
@@ -35,8 +35,6 @@ export const AuthProvider = ({ children }) => {
         setIsLoggedIn(false);
       }
     } else {
-      // Don't auto-clear tokens - only clear on explicit logout
-      console.log('No session data found on page load');
       setUser(null);
       setIsLoggedIn(false);
     }
@@ -47,6 +45,7 @@ export const AuthProvider = ({ children }) => {
     setIsLoggedIn(true);
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', token);
+    localStorage.setItem('role', userData.role);
   };
 
   const logout = () => {

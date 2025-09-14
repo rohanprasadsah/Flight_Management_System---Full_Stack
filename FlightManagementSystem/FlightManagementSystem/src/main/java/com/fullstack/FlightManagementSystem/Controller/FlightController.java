@@ -47,7 +47,7 @@ public class FlightController {
 	}
 	
 	@PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('CUSTOMER')")
-	@GetMapping("/findBySource&Destination")
+	@GetMapping("/findBySourceAndDestination")
 	public ResponseEntity<ApiResponse<List<Flight>>> findBySourceAndDestination(@RequestParam String source,@RequestParam String destination){
 		return fs.findFlightBySourceAndDestination(source, destination);
 	}
