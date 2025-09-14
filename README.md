@@ -1,6 +1,6 @@
 # ✈️ Flight Management System
 
-A comprehensive full-stack web application for managing flights and passenger bookings, built with modern technologies including React frontend and Spring Boot backend.
+A comprehensive full-stack web application for managing flights and passenger bookings with **JWT-based authentication** and **role-based authorization**. Built with modern technologies including React frontend and Spring Boot backend.
 
 ## 🏗️ Project Architecture
 
@@ -9,32 +9,45 @@ Flight Management System
 ├── Frontend (React + Vite)
 │   ├── Modern UI with Tailwind CSS
 │   ├── Redux state management
+│   ├── JWT Authentication & Context API
 │   └── Responsive design
 └── Backend (Spring Boot)
-    ├── RESTful API
+    ├── RESTful API with Security
+    ├── JWT Authentication
+    ├── Role-based Authorization
     ├── PostgreSQL database
     └── JPA/Hibernate ORM
 ```
 
 ## 🌟 Features
 
+### 🔐 Authentication & Authorization
+- **JWT Token-based Authentication**: Secure login/logout with JSON Web Tokens
+- **Role-based Access Control**: Three user roles (ADMIN, STAFF, CUSTOMER)
+- **User Registration**: New users can register with role selection
+- **Secure Endpoints**: Protected API endpoints with role-specific permissions
+- **Session Management**: Persistent login state with localStorage
+- **Password Security**: Encrypted password storage with BCrypt
+
 ### ✅ Flight Management
-- **Add New Flights**: Create flights with details like name, source, destination, time, price, and image
-- **View All Flights**: Display all available flights in a responsive grid layout
-- **Update Flights**: Edit existing flight information
-- **Delete Flights**: Remove flights from the system
-- **Search Flights**: Filter flights by source and destination cities
+- **Add New Flights**: Create flights with details like name, source, destination, time, price, and image *(ADMIN only)*
+- **View All Flights**: Display all available flights in a responsive grid layout *(All authenticated users)*
+- **Update Flights**: Edit existing flight information *(ADMIN/STAFF)*
+- **Delete Flights**: Remove flights from the system *(ADMIN only)*
+- **Search Flights**: Filter flights by source and destination cities *(All authenticated users)*
 
 ### ✅ Passenger Management
-- **Add Passengers**: Register passengers to specific flights
-- **View Passengers**: List all passengers for a particular flight
-- **Update Passenger Info**: Modify passenger details
-- **Passenger-Flight Association**: Link passengers with their respective flights
+- **Add Passengers**: Register passengers to specific flights *(All authenticated users)*
+- **View Passengers**: List all passengers for a particular flight *(All authenticated users)*
+- **Update Passenger Info**: Modify passenger details *(Owner/ADMIN/STAFF)*
+- **Delete Passengers**: Remove passengers from flights *(ADMIN only)*
+- **User-Passenger Association**: Link passengers with their respective users
 
 ### ✅ User Interface
 - **Modern Design**: Clean, gradient-based UI with smooth animations
 - **Responsive Layout**: Mobile-first design that works on all devices
 - **Interactive Elements**: Hover effects, transitions, and intuitive navigation
+- **Authentication Flow**: Beautiful login/register forms with validation
 - **Search Functionality**: Real-time flight search with form validation
 
 ## 🛠️ Technology Stack
@@ -47,6 +60,8 @@ Flight Management System
 - **Build Tool**: Vite 7.1.2
 - **Language**: JavaScript (ES6+)
 - **Package Manager**: npm
+- **Authentication**: Context API for state management
+- **HTTP Client**: Fetch API for REST calls
 
 ### Backend
 - **Framework**: Spring Boot 3.5.4
@@ -54,19 +69,23 @@ Flight Management System
 - **Database**: PostgreSQL
 - **ORM**: Spring Data JPA with Hibernate
 - **Build Tool**: Maven
+- **Security**: Spring Security with JWT
 - **Additional Libraries**:
-  - Lombok (for reducing boilerplate code)
-  - Spring Boot DevTools (for development)
-  - Jackson (for JSON processing)
+  - **Authentication**: JWT (JSON Web Tokens) 0.12.5
+  - **Security**: Spring Boot Security Starter
+  - **Validation**: Spring Boot Validation Starter
+  - **Email**: Spring Boot Mail Starter
+  - **Lombok** (for reducing boilerplate code)
+  - **Spring Boot DevTools** (for development)
+  - **Jackson** (for JSON processing)
 
 ## 📁 Project Structure
 
 ### Root Directory Structure
 ```
 Flight-Management-System/
-├── FMS-Frontend/                    # React Frontend Application
+├── Frontend/                        # React Frontend Application
 │   ├── public/
-│   │   └── vite.svg
 │   ├── src/
 │   │   ├── Components/
 │   │   │   ├── AddFlight.jsx
@@ -75,12 +94,21 @@ Flight-Management-System/
 │   │   │   ├── Flight.jsx
 │   │   │   ├── FlightSearch.jsx
 │   │   │   ├── Footer.jsx
+│   │   │   ├── Login.jsx            # 🔐 Login Component
 │   │   │   ├── Navbar.jsx
 │   │   │   ├── Passengers.jsx
+│   │   │   ├── Register.jsx         # 🔐 Registration Component
 │   │   │   ├── UpdateFlightById.jsx
 │   │   │   └── UpdatePassengerById.jsx
+│   │   ├── Context/
+│   │   │   └── AuthContext.jsx      # 🔐 Authentication Context
+│   │   ├── Services/
+│   │   │   └── authService.js       # 🔐 Authentication Service
 │   │   ├── Utils/
 │   │   │   ├── addFlightSlice.js
+│   │   │   ├── authApi.js           # 🔐 Auth API utilities
+│   │   │   ├── authUtils.js         # 🔐 Auth helper functions
+│   │   │   ├── SessionFixer.jsx     # 🔐 Session management
 │   │   │   ├── store.js
 │   │   │   └── useFetchFlights.js
 │   │   ├── App.jsx
@@ -88,7 +116,6 @@ Flight-Management-System/
 │   │   └── index.css
 │   ├── .gitignore
 │   ├── package.json
-│   ├── package-lock.json
 │   ├── vite.config.js
 │   ├── eslint.config.js
 │   └── index.html
@@ -96,10 +123,15 @@ Flight-Management-System/
 │   └── FlightManagementSystem/
 │       ├── src/main/java/com/fullstack/FlightManagementSystem/
 │       │   ├── Config/
-│       │   │   └── GlobalCorsConfig.java
+│       │   │   └── SecurityConfig.java      # 🔐 Security Configuration
 │       │   ├── Controller/
 │       │   │   ├── FlightController.java
 │       │   │   └── PassengerController.java
+│       │   ├── DTO/                         # 🔐 Data Transfer Objects
+│       │   │   ├── AuthController.java      # 🔐 Authentication Controller
+│       │   │   ├── AuthResponse.java        # 🔐 Auth Response DTO
+│       │   │   ├── LoginRequest.java        # 🔐 Login Request DTO
+│       │   │   └── RegisterRequest.java     # 🔐 Register Request DTO
 │       │   ├── Exception/
 │       │   │   ├── GlobalExceptionHandler.java
 │       │   │   ├── IdNotFoundException.java
@@ -107,24 +139,30 @@ Flight-Management-System/
 │       │   ├── Model/
 │       │   │   ├── ApiResponse.java
 │       │   │   ├── Flight.java
-│       │   │   └── Passengers.java
+│       │   │   ├── Passengers.java
+│       │   │   ├── Users.java               # 🔐 User Entity
+│       │   │   └── UserRole.java            # 🔐 User Role Enum
 │       │   ├── Repository/
 │       │   │   ├── FlightRepository.java
 │       │   │   ├── FRepo.java
-│       │   │   └── PRepo.java
+│       │   │   ├── PRepo.java
+│       │   │   └── UserRepository.java      # 🔐 User Repository
+│       │   ├── Security/                    # 🔐 Security Package
+│       │   │   ├── JwtAuthenticationFilter.java  # JWT Filter
+│       │   │   └── JwtUtil.java             # JWT Utility
 │       │   ├── Service/
 │       │   │   ├── FlightService.java
-│       │   │   └── PassengerService.java
+│       │   │   ├── PassengerService.java
+│       │   │   └── UserService.java         # 🔐 User Service
 │       │   └── FlightManagementSystemApplication.java
 │       ├── src/main/resources/
-│       │   └── application.properties
-│       ├── target/                   # Build output (excluded from git)
+│       │   └── application.properties       # Includes JWT config
+│       ├── target/                          # Build output
 │       ├── .gitignore
-│       ├── .gitattributes
-│       ├── pom.xml
+│       ├── pom.xml                          # Updated with security deps
 │       ├── mvnw
 │       └── mvnw.cmd
-└── README.md                         # This file
+└── README.md                                # This file
 ```
 
 ## 🚀 Getting Started
@@ -152,14 +190,18 @@ Flight-Management-System/
    ```
 
 3. **Configure Database**
-   - Create a PostgreSQL database named `flight_management`
+   - Create a PostgreSQL database named `flightmanagementsystem`
    - Update `src/main/resources/application.properties` with your database credentials:
    ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/flight_management
+   spring.datasource.url=jdbc:postgresql://localhost:5432/flightmanagementsystem
    spring.datasource.username=your_username
    spring.datasource.password=your_password
    spring.jpa.hibernate.ddl-auto=update
    spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+   
+   # JWT Configuration
+   jwt.secret=YourSecretKeyForJWTTokenGenerationShouldBeLongAndSecure123456789
+   jwt.expiration=86400000
    ```
 
 4. **Run the Backend**
@@ -173,7 +215,7 @@ Flight-Management-System/
 
 5. **Navigate to Frontend Directory** (open new terminal)
    ```bash
-   cd Flight-Management-System-Full_Stack/FMS-Frontend
+   cd Frontend
    ```
 
 6. **Install Dependencies**
@@ -188,26 +230,43 @@ Flight-Management-System/
    
    ✅ Frontend will run on `http://localhost:5173`
 
-8. **Build for Production**
+8. **First Time Setup - Create Admin User**
+   - Navigate to `http://localhost:5173/register`
+   - Register with role "ADMIN" to get full system access
+   - Or register as "CUSTOMER" for limited access
+
+9. **Build for Production**
    ```bash
    npm run build
    ```
 
 ## 🔗 API Endpoints
 
-### Flight Endpoints
-- `GET /FMS/findAll` - Get all flights
-- `GET /FMS/find/{id}` - Get flight by ID
-- `GET /FMS/findBySource&Destination` - Search flights by source and destination
-- `POST /FMS/save` - Create new flight
-- `PUT /FMS/putUpdate/{id}` - Update flight
-- `DELETE /FMS/delete/{id}` - Delete flight
+### 🔐 Authentication Endpoints
+- `POST /auth/register` - Register new user (Public)
+- `POST /auth/login` - User login (Public)
 
-### Passenger Endpoints
-- `GET /FMS/passengers/{flightId}` - Get passengers for a flight
-- `POST /FMS/savePassenger/{flightId}` - Add passenger to flight
-- `PUT /FMS/updatePassenger/{id}` - Update passenger details
-- `DELETE /FMS/deletePassenger/{id}` - Delete passenger
+### ✈️ Flight Endpoints
+- `GET /FMS/findAll` - Get all flights *(All authenticated users)*
+- `GET /FMS/find/{id}` - Get flight by ID *(All authenticated users)*
+- `GET /FMS/findBySourceAndDestination` - Search flights by source and destination *(All authenticated users)*
+- `POST /FMS/save` - Create new flight *(ADMIN only)*
+- `PUT /FMS/putUpdate/{id}` - Update flight *(ADMIN/STAFF)*
+- `DELETE /FMS/delete/{id}` - Delete flight *(ADMIN only)*
+- `POST /FMS/savePassenger/{id}` - Add passenger to flight *(All authenticated users)*
+
+### 👥 Passenger Endpoints
+- `GET /FMS/Passenger/findAll` - Get all passengers *(ADMIN/STAFF)*
+- `GET /FMS/Passenger/find/{id}` - Get passenger by ID *(Owner/ADMIN/STAFF)*
+- `GET /FMS/Passenger/findByFirstName` - Search passengers by first name *(All authenticated users)*
+- `POST /FMS/Passenger/save` - Add new passenger *(All authenticated users)*
+- `PUT /FMS/Passenger/updatePassenger/{id}` - Update passenger details *(Owner/ADMIN/STAFF)*
+- `DELETE /FMS/Passenger/delete/{id}` - Delete passenger *(ADMIN only)*
+
+### 🔑 Role-based Access Control
+- **ADMIN**: Full access to all endpoints
+- **STAFF**: Can manage flights and passengers (except delete operations)
+- **CUSTOMER**: Can view flights, manage their own passenger bookings
 
 ## 🎨 UI/UX Features
 
@@ -226,30 +285,104 @@ Flight-Management-System/
 
 ## 🔧 Key Components Explained
 
+### 🔐 Authentication Components
+
+#### AuthContext.jsx
+- React Context for global authentication state management
+- Manages user login/logout state
+- Provides authentication methods to child components
+- Handles localStorage for persistent sessions
+
+#### Login.jsx & Register.jsx
+- Beautiful authentication forms with gradient backgrounds
+- Form validation and error handling
+- Integration with AuthContext for state management
+- Role selection during registration (ADMIN, STAFF, CUSTOMER)
+
+#### authService.js
+- Service layer for authentication API calls
+- Handles login and registration requests
+- Error handling for authentication failures
+- JWT token management
+
 ### Frontend Components
 
 #### AllFlights.jsx
 - Main dashboard component displaying all flights
 - Integrates search functionality
-- Handles flight deletion
+- Handles flight deletion (role-based)
 - Uses Redux for state management
+- Authentication-protected routes
 
 #### Flight.jsx
 - Individual flight card component
 - Displays flight details with attractive styling
 - Reusable component used throughout the app
+- Role-based action buttons
 
 #### FlightSearch.jsx
 - Search form component for filtering flights
 - Real-time search by source and destination
 - Form validation and submission handling
+- Authentication required for access
 
 #### AddFlight.jsx & UpdateFlightById.jsx
 - Forms for creating and updating flight information
 - Form validation and error handling
 - Redux integration for state updates
+- Role-based access (ADMIN for create, ADMIN/STAFF for update)
 
 ### Backend Components
+
+#### 🔐 Security & Authentication
+
+##### Users.java (Model)
+```java
+@Entity
+public class Users {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    
+    @Column(unique = true)
+    private String email;
+    
+    @Column(nullable = false)
+    private String password;  // BCrypt encrypted
+    
+    private String name;
+    
+    @Enumerated(EnumType.STRING)
+    private UserRole role;  // ADMIN, STAFF, CUSTOMER
+    
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+    
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+    
+    @OneToMany(mappedBy = "user")
+    private List<Passengers> passengers;
+}
+```
+
+##### JwtUtil.java
+- JWT token generation and validation
+- Token expiration management
+- Secret key handling for token signing
+- Email extraction from tokens
+
+##### AuthController.java
+- Handles user registration and login
+- JWT token generation on successful authentication
+- Password validation using BCrypt
+- Returns AuthResponse with user details and token
+
+##### SecurityConfig.java
+- Spring Security configuration
+- JWT filter chain setup
+- CORS configuration
+- Public endpoint definitions
 
 #### Flight.java (Model)
 ```java
@@ -269,16 +402,29 @@ public class Flight {
 ```
 
 #### FlightController.java
-- RESTful controller handling HTTP requests
-- CRUD operations for flights
+- RESTful controller with role-based security
+- `@PreAuthorize` annotations for endpoint protection
+- CRUD operations for flights with role restrictions
 - Exception handling and response formatting
 
 #### FlightService.java
 - Business logic layer
 - Data validation and processing
 - Repository interaction
+- Security context integration
 
 ## 🗄️ Database Design
+
+### Users Table 🔐
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INT (PK) | Primary key |
+| email | VARCHAR (Unique) | User email address |
+| password | VARCHAR | Encrypted password (BCrypt) |
+| name | VARCHAR | User full name |
+| role | ENUM | User role (ADMIN, STAFF, CUSTOMER) |
+| created_at | TIMESTAMP | Account creation timestamp |
+| updated_at | TIMESTAMP | Last update timestamp |
 
 ### Flight Table
 | Column | Type | Description |
@@ -299,6 +445,12 @@ public class Flight {
 | lastName | VARCHAR | Last name |
 | age | INT | Passenger age |
 | flight_id | INT (FK) | Foreign key to Flight |
+| user_id | INT (FK) | Foreign key to Users 🔐 |
+
+### 🔗 Relationships
+- **Users → Passengers**: One-to-Many (A user can have multiple passenger bookings)
+- **Flight → Passengers**: One-to-Many (A flight can have multiple passengers)
+- **Users → Flight**: Many-to-Many (through Passengers table)
 
 ## 🛡️ Error Handling
 
@@ -359,15 +511,20 @@ mvn spring-boot:run   # Run the application
 
 ## 📋 Future Enhancements
 
-- [ ] User authentication and authorization
+- [x] ✅ **User authentication and authorization** - *(Completed with JWT)*
 - [ ] Payment gateway integration
-- [ ] Email notifications for bookings
-- [ ] Flight booking system
-- [ ] Admin dashboard for analytics
+- [ ] Email notifications for bookings (Email service ready)
+- [ ] Flight booking confirmation system
+- [ ] Admin dashboard with analytics and charts
 - [ ] Real-time flight status updates
 - [ ] Mobile app development
 - [ ] PDF ticket generation
 - [ ] Multi-language support
+- [ ] Password reset functionality
+- [ ] Two-factor authentication (2FA)
+- [ ] User profile management
+- [ ] Flight capacity management
+- [ ] Booking history for users
 
 ## 🐛 Known Issues
 
