@@ -30,8 +30,10 @@ const AddFlight = () => {
       console.log('ADD FLIGHT - Attempting to save flight:', flight);
       
       // Use enhanced authentication API that handles token expiration
+      // const url = 'http://localhost:8080/FMS/save'; // For local development
+      const url = `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/save`;
       const response = await authenticatedFetchJson(
-        'http://localhost:8080/FMS/save',
+        url,
         {
           method: 'POST',
           body: JSON.stringify(flight)

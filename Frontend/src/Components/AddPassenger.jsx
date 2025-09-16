@@ -20,7 +20,8 @@ const AddPassenger = () => {
         }
 
         // Use findAll endpoint which works reliably
-        const response = await fetch("http://localhost:8080/FMS/findAll", {
+        // const response = await fetch("http://localhost:8080/FMS/findAll", { // For local development
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/findAll`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -89,8 +90,9 @@ const AddPassenger = () => {
         return;
       }
 
+      // const response = await fetch(`http://localhost:8080/FMS/savePassenger/${id}`, // For local development
       const response = await fetch(
-        `http://localhost:8080/FMS/savePassenger/${id}`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/savePassenger/${id}`,
         {
           method: "POST",
           headers: {

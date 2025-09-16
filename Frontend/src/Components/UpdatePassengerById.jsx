@@ -19,8 +19,9 @@ const UpdatePassengerById = () => {
 
         try {
           // Try direct passenger fetch first
+          // const response = await fetch("http://localhost:8080/FMS/Passenger/find/" + id, // For local development
           const response = await fetch(
-            "http://localhost:8080/FMS/Passenger/find/" + id,
+            `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/Passenger/find/` + id,
             {
               method: "GET",
               headers: {
@@ -61,8 +62,9 @@ const UpdatePassengerById = () => {
         // If direct fetch didn't work, try getting all passengers and filter by ID
         if (!passengerData) {
           try {
+            // const allPassengersResponse = await fetch("http://localhost:8080/FMS/Passenger/findAll", // For local development
             const allPassengersResponse = await fetch(
-              "http://localhost:8080/FMS/Passenger/findAll",
+              `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/Passenger/findAll`,
               {
                 method: "GET",
                 headers: {
@@ -117,7 +119,8 @@ const UpdatePassengerById = () => {
   }, [id]);
   const findFlightForPassenger = async (passengerId, token) => {
     try {
-      const response = await fetch("http://localhost:8080/FMS/findAll", {
+      // const response = await fetch("http://localhost:8080/FMS/findAll", { // For local development
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/findAll`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -154,8 +157,9 @@ const UpdatePassengerById = () => {
         alert("Please log in to update passenger details.");
         return;
       }
+      // const response = await fetch("http://localhost:8080/FMS/Passenger/updatePassenger/" + id, // For local development
       const response = await fetch(
-        "http://localhost:8080/FMS/Passenger/updatePassenger/" + id,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/Passenger/updatePassenger/` + id,
         {
           method: "PUT",
           headers: {

@@ -44,7 +44,8 @@ const AllFlights = () => {
     
     const cleanSource = source.trim();
     const cleanDestination = destination.trim();
-    const searchUrl = `http://localhost:8080/FMS/findBySourceAndDestination?source=${cleanSource}&destination=${cleanDestination}`;
+    // const searchUrl = `http://localhost:8080/FMS/findBySourceAndDestination?source=${cleanSource}&destination=${cleanDestination}`; // For local development
+    const searchUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/findBySourceAndDestination?source=${cleanSource}&destination=${cleanDestination}`;
     
     try {
       const token = localStorage.getItem('token');
@@ -139,7 +140,8 @@ const AllFlights = () => {
         return;
       }
       
-      const response = await fetch(`http://localhost:8080/FMS/delete/${id}`, {
+      // const response = await fetch(`http://localhost:8080/FMS/delete/${id}`, { // For local development
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/delete/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

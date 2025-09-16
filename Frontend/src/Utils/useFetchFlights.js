@@ -23,7 +23,8 @@ const useFetchFlights = () => {
                 if (token) {
                     headers['Authorization'] = `Bearer ${token}`;
                 }
-                const allFlights = await fetch("http://localhost:8080/FMS/findAll", {
+                // const allFlights = await fetch("http://localhost:8080/FMS/findAll", { // For local development
+                const allFlights = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/findAll`, {
                     method: 'GET',
                     headers: headers
                 });

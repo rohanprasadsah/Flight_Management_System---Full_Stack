@@ -19,7 +19,8 @@ const Passengers = () => {
           headers["Authorization"] = `Bearer ${token}`;
         }
 
-        const allFlightsRes = await fetch("http://localhost:8080/FMS/findAll", {
+        // const allFlightsRes = await fetch("http://localhost:8080/FMS/findAll", { // For local development
+        const allFlightsRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/findAll`, {
           method: "GET",
           headers: headers,
         });
@@ -77,8 +78,9 @@ const Passengers = () => {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
+      // const deletedPassenger = await fetch("http://localhost:8080/FMS/Passenger/delete/" + id, // For local development
       const deletedPassenger = await fetch(
-        "http://localhost:8080/FMS/Passenger/delete/" + id,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/Passenger/delete/` + id,
         {
           method: "DELETE",
           headers: headers,
@@ -131,8 +133,9 @@ const Passengers = () => {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
+      // const res = await fetch("http://localhost:8080/FMS/Passenger/findByFirstName?firstName=" + // For local development
       const res = await fetch(
-        "http://localhost:8080/FMS/Passenger/findByFirstName?firstName=" +
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/Passenger/findByFirstName?firstName=` +
           encodeURIComponent(search.trim()),
         {
           method: "GET",

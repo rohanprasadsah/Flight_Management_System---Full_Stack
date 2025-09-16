@@ -18,8 +18,9 @@ const UpdateFlightById = () => {
         let response;
 
         try {
+          // const findResponse = await fetch(`http://localhost:8080/FMS/find/${id}`, // For local development
           const findResponse = await fetch(
-            `http://localhost:8080/FMS/find/${id}`,
+            `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/find/${id}`,
             {
               method: "GET",
               headers: {
@@ -40,8 +41,9 @@ const UpdateFlightById = () => {
             throw new Error(`Find endpoint failed: ${findResponse.status}`);
           }
         } catch (findError) {
+          // const allFlightsResponse = await fetch("http://localhost:8080/FMS/findAll", // For local development
           const allFlightsResponse = await fetch(
-            "http://localhost:8080/FMS/findAll",
+            `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/findAll`,
             {
               method: "GET",
               headers: {
@@ -141,8 +143,9 @@ const UpdateFlightById = () => {
         return;
       }
 
+      // const apiResponse = await fetch(`http://localhost:8080/FMS/putUpdate/${fid}`, // For local development
       const apiResponse = await fetch(
-        `http://localhost:8080/FMS/putUpdate/${fid}`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/FMS/putUpdate/${fid}`,
         {
           method: "PUT",
           headers: {
