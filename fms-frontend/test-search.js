@@ -29,7 +29,7 @@ const testFlightSearch = async (source, destination) => {
     }
     
     try {
-        // Make the same request that the frontend makes
+        // Make the same request that the fms-frontend makes
         const url = `http://localhost:8080/FMS/findBySourceAndDestination?source=${encodeURIComponent(source)}&destination=${encodeURIComponent(destination)}`;
         console.log('🌐 Request URL:', url);
         
