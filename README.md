@@ -1,12 +1,12 @@
 # ✈️ Flight Management System
 
-A comprehensive full-stack web application for managing flights and passenger bookings with **JWT-based authentication** and **role-based authorization**. Built with modern technologies including React frontend and Spring Boot backend.
+A comprehensive full-stack web application for managing flights and passenger bookings with **JWT-based authentication** and **role-based authorization**. Built with modern technologies including React fms-frontend and Spring Boot backend.
 
 ## 🏗️ Project Architecture
 
 ```
 Flight Management System
-├── Frontend (React + Vite)
+├── fms-frontend (React + Vite)
 │   ├── Modern UI with Tailwind CSS
 │   ├── Redux state management
 │   ├── JWT Authentication & Context API
@@ -56,7 +56,7 @@ Flight Management System
 
 ## 🛠️ Technology Stack
 
-### Frontend
+### fms-frontend
 
 - **Framework**: React 19.1.1
 - **State Management**: Redux Toolkit
@@ -91,7 +91,7 @@ Flight Management System
 
 ```
 Flight-Management-System/
-├── Frontend/                        # React Frontend Application
+├── fms-frontend/                        # React fms-frontend Application
 │   ├── public/
 │   ├── src/
 │   │   ├── Components/
@@ -222,12 +222,12 @@ Flight-Management-System/
    ```
    ✅ Backend will run on `http://localhost:8080`
 
-### Frontend Setup
+### fms-frontend Setup
 
-5. **Navigate to Frontend Directory** (open new terminal)
+5. **Navigate to fms-frontend Directory** (open new terminal)
 
    ```bash
-   cd Frontend
+   cd fms-frontend
    ```
 
 6. **Install Dependencies**
@@ -242,7 +242,7 @@ Flight-Management-System/
    npm run dev
    ```
 
-   ✅ Frontend will run on `http://localhost:5173`
+   ✅ fms-frontend will run on `http://localhost:5173`
 
 8. **First Time Setup - Create Admin User**
 
@@ -329,7 +329,7 @@ Flight-Management-System/
 - Error handling for authentication failures
 - JWT token management
 
-### Frontend Components
+### fms-frontend Components
 
 #### AllFlights.jsx
 
@@ -493,7 +493,7 @@ public class Flight {
 
 ## 🛡️ Error Handling
 
-### Frontend
+### fms-frontend
 
 - Try-catch blocks for API calls
 - User-friendly error messages
@@ -509,7 +509,7 @@ public class Flight {
 
 ## 🚀 Deployment
 
-### Frontend Deployment
+### fms-frontend Deployment
 
 1. Build the project: `npm run build`
 2. Deploy the `dist` folder to your hosting service
@@ -524,7 +524,7 @@ public class Flight {
 
 ## 📝 Development Scripts
 
-### Frontend Scripts
+### fms-frontend Scripts
 
 ```json
 {
