@@ -60,7 +60,9 @@ public class SecurityConfig {
 	        .cors(cors -> cors.configurationSource(request -> {
 	            var config = new org.springframework.web.cors.CorsConfiguration();
 	            config.setAllowCredentials(true);
+	            config.addAllowedOrigin("http://localhost:3000");
 	            config.addAllowedOrigin("http://localhost:5173");
+	            config.addAllowedOrigin("https://fms-frontend-indol.vercel.app");
 	            config.addAllowedHeader("*");
 	            config.addAllowedMethod("*");
 	            return config;
@@ -70,6 +72,7 @@ public class SecurityConfig {
 	    http.authorizeHttpRequests(auth -> auth
 	            .requestMatchers("/auth/**").permitAll()
 	            .requestMatchers("/public/**").permitAll()
+	            .requestMatchers("/welcome").permitAll()
 	            .anyRequest().authenticated()
 	    );
 
